@@ -1,0 +1,66 @@
+.container {
+  text-align: center;
+  padding: 20px;
+}
+
+.title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.count, .cps {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.cookieImageContainer {
+  margin: 20px 0;
+  cursor: pointer;
+}
+
+.cookieImage {
+  transition: transform 0.1s ease-in-out;
+}
+
+.cookieImage:hover {
+  transform: scale(1.05);
+}
+
+.cookieImage:active {
+  transform: scale(0.95);
+}
+
+@keyframes clickAnimation {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.clickAnimation {
+  animation: clickAnimation 0.3s ease-in-out;
+}
+
+.upgradesContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.upgradeButton {
+  margin: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.upgradeButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.saveId {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #666;
+}
