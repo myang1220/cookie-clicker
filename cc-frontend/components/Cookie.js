@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import NextImage from 'next/image';
 import { useRouter } from 'next/navigation';
 import { db } from '../../cc-backend/firebaseConfig';
@@ -17,6 +17,17 @@ const Cookie = () => {
   const [saveId, setSaveId] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const router = useRouter();
+  
+  // Use refs to keep track of the latest state values
+  const cookiesRef = useRef(cookies);
+  const cpsRef = useRef(cps);
+  const upgradesRef = useRef(upgrades);
+
+  useEffect(() => {
+    cookiesRef.current = cookies;
+    cpsRef.current = cps;
+    upgradesRef.current = upgrades;
+  }, [cookies, cps, upgrades]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -37,9 +48,11 @@ const Cookie = () => {
       const unsubscribe = onSnapshot(gameStateRef, (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
-          setCookies(data.cookies);
-          setCps(data.cps);
-          setUpgrades(data.upgrades);
+          if (data.cookies > cookiesRef.current) {
+            setCookies(data.cookies);
+            setCps(data.cps);
+            setUpgrades(data.upgrades);
+          }
         }
       });
 
@@ -49,20 +62,20 @@ const Cookie = () => {
 
   useEffect(() => {
     const cookieInterval = setInterval(() => {
-      setCookies(prevCookies => prevCookies + cps);
+      setCookies(prevCookies => prevCookies + cpsRef.current);
     }, 1000);
 
     const saveInterval = setInterval(() => {
       if (saveId) {
         saveGameState();
       }
-    }, 60000); // Save every minute
+    }, 10000); // Save every ten seconds
 
     return () => {
       clearInterval(cookieInterval);
       clearInterval(saveInterval);
     };
-  }, [cps, saveId]);
+  }, [saveId]);
 
   const loadGameState = async (loadSaveId) => {
     try {
@@ -83,13 +96,19 @@ const Cookie = () => {
 
   const saveGameState = async () => {
     try {
+      if (!saveId) {
+        console.error('SaveId is not set');
+        return;
+      }
       const gameStateRef = doc(db, 'gameStates', saveId);
-      await setDoc(gameStateRef, {
-        cookies,
-        cps,
-        upgrades,
+      const currentState = {
+        cookies: Math.floor(cookiesRef.current),
+        cps: cpsRef.current,
+        upgrades: upgradesRef.current,
         lastSaved: new Date().toISOString()
-      }, { merge: true });
+      };
+      await setDoc(gameStateRef, currentState, { merge: true });
+      console.log("Game state saved successfully", currentState);
     } catch (error) {
       console.error('Error saving game state:', error);
     }
@@ -98,7 +117,7 @@ const Cookie = () => {
   const clickCookie = () => {
     setCookies(prevCookies => prevCookies + 1);
     setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 300); // Duration of the animation
+    setTimeout(() => setIsAnimating(false), 150);
   };
 
   const buyUpgrade = (type) => {
