@@ -1,6 +1,7 @@
 {
   "name": "cc-frontend",
   "version": "0.1.0",
+  "homepage": "https://myang1220.github.io/fsab-project",
   "private": true,
   "scripts": {
     "dev": "next dev",
